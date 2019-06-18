@@ -1,0 +1,116 @@
+#!/bin/sh -e
+# Slackware build script latex2html
+#converts latex docs to html 
+# Copyright (C) 2019  andy brookes 
+#andybrookestar@gmail.com 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+#Set initial variables:	
+PRGNAM=latex2html
+APP=latex2html
+VERSION=${VERSION:-2019.2}
+# If the version conflicts with the Slackware package standard
+# The dash character ("-") is not allowed in the VERSION string
+# You can set the PKG_VERSION to something else than VERSION
+PKG_VERSION=2019.2 # the version which appears in the package name. 
+
+# First digit is the build number, which specifies how many times it has been built.	
+# Second string is the short form of the authors name, typical three initials:w
+BUILD=${BUILD:-1_arb}
+TAG=${TAG:-_SBo}
+CWD=$(pwd)
+TMP=${TMP:-/tmp/SBo}
+# The installation directory of the package (where its actual directory
+# structure will be created) 
+PKG=$TMP/package-$APP
+# The installation directory of the package (where its actual directory
+# structure will be created) 
+PKG=$TMP/package-$APP
+# Automatically determine the architecture we're building on:
+if [ -z "$ARCH" ]; then
+  case "$( uname -m )" in
+    i?86) ARCH=i486 ;;
+    arm*) ARCH=arm ;;
+    # Unless $ARCH is already set, use uname -m for all other archs:
+       *) ARCH=$( uname -m ) ;;
+  esac
+fi
+
+
+if [ "$ARCH" = "i486" ]; then
+  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
+  LIBDIRSUFFIX=""
+elif [ "$ARCH" = "i686" ]; then
+  SLKCFLAGS="-O2 -march=i686 -mtune=i686"
+  LIBDIRSUFFIX=""
+elif [ "$ARCH" = "x86_64" ]; then
+  SLKCFLAGS="-O2 -fPIC"
+  LIBDIRSUFFIX="64"
+else
+  SLKCFLAGS="-O2"
+  LIBDIRSUFFIX=""
+fi
+
+# Delete the leftover directories if they exist (due to a previous build)
+# and (re)create the packaging directory
+rm -rf $PKG 
+mkdir -p $TMP $PKG
+rm -rf $TMP/$APP-$VERSION
+
+# Change to the TMP directory
+cd $TMP || exit 1
+ 
+# Extract the application source in TMP
+# Note: if your application comes as a tar.bz2, you need tar -jxvf
+tar -zxvf $CWD/$APP-$VERSION.tar.gz || exit 1
+
+# Change to the application source directory
+cd $APP-$VERSION || exit 1
+ 
+# Change ownership and permissions if necessary
+# This may not be needed in some source tarballs, but it never hurts
+chown -R root:root .
+chmod -R u+w,go+r-w,a-s .
+
+# Set configure options
+# If your app is written in C++, you'll also need to add a line for CXXFLAGS
+CFLAGS="$SLKCFLAGS" \
+  ./configure \
+  --prefix=/usr \
+  --sysconfdir=/etc \
+  --localstatedir=/var \
+  --with-perl=/usr/bin/perl \
+  --enable-eps \
+  --enable-gif \
+  --enable-png \
+  --build=$ARCH-slackware-linux \
+  --host=$ARCH-slackware-linux 
+
+# compile the source, but exit if anything goes wrong
+make || exit
+ 
+# Install everything into the package directory, but exit if anything goes wrong
+make install DESTDIR=$PKG || exit
+# Create a directory for documentation
+mkdir -p $PKG/usr/doc/$APP-$VERSION
+# Copy documentation to the docs directory and fix permissions
+cp -a BUGS Changes FAQ INSTALL LICENSE MANIFEST README.md  TODO docs/ $PKG/usr/doc/$APP-$VERSION
+find $PKG/usr/doc/$APP-$VERSION -type f -exec chmod 644 {} \;
+# Create the ./install directory and copy the slack-desc into it
+mkdir -p $PKG/install
+cat $CWD/slack-desc > $PKG/install/slack-desc
+# Build the package
+cd $PKG
+/sbin/makepkg -l y -c n $TMP/$APP-$PKG_VERSION-$ARCH-$BUILD.tgz
+
+
