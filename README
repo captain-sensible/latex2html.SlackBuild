@@ -22,8 +22,13 @@ $latex2html helloworld.tex
 
 
 The purpose for this slackbuild was that it is aimed
-at noobs who are folowing along this document 
+at noobs who are following along this document 
 https://www.slackwiki.com/Writing_A_SlackBuild_Script
 
+
+the way i get the source so thats its named to match slackbuild is:
+
+
+ wget -O latex2html-2019.2.tar.gz https://github.com/latex2html/latex2html/archive/v2019.2.tar.gz
 
  
