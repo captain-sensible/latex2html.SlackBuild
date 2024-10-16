@@ -31,4 +31,5 @@ the way i get the source so thats its named to match slackbuild is:
 
  wget -O latex2html-2019.2.tar.gz https://github.com/latex2html/latex2html/archive/v2019.2.tar.gz
 
- 
+ the slackbuild is now officially in slackbuilds:
+https://slackbuilds.org/repository/15.0/academic/latex2html/?search=latex2html
